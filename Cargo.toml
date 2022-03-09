@@ -1,0 +1,24 @@
+[package]
+name = "kv-server"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+prost = "0.9.0"    # protobuf process
+anyhow = "1.0.52"
+bytes = "1.1.0"
+async-prost = "0.3.0"
+futures = "0.3.19"
+tokio = { version = "1.15.0", features = ["full"]}
+tracing = "0.1.31"  # log trace
+tracing-subscriber = { version = "0.3.9", features = [
+    "env-filter",
+    "time",
+    "local-time"
+] }  # log trace
+time = { version = "0.3.7", features = ["macros"] }
+
+[build-dependencies]
+prost-build = "0.9.0"  # compile protobuf
