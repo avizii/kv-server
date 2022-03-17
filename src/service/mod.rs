@@ -10,36 +10,29 @@ pub trait CommandService {
     fn execute(self, store: &dyn Storage) -> CommandResponse;
 }
 
-pub struct ServiceInner<Store> {
-    store: Store,
+pub struct Service {
+    store: Arc<dyn Storage>,
 }
 
-pub struct Service<Store = MemTable> {
-    inner: Arc<ServiceInner<Store>>,
-}
-
-impl<Store> Clone for Service<Store> {
+impl Clone for Service {
     fn clone(&self) -> Self {
         Self {
-            inner: Arc::clone(&self.inner),
+            store: Arc::clone(&self.store),
         }
     }
 }
 
-impl<Store: Storage> Service<Store> {
-    pub fn new(store: Store) -> Self {
+impl Service {
+    pub fn new<S: Storage>(store: S) -> Self {
         Self {
-            inner: Arc::new(
-                ServiceInner {
-                    store
-                })
+            store: Arc::new(store)
         }
     }
 
     pub fn execute(&self, cmd: CommandRequest) -> CommandResponse {
         debug!("Got Request: {:?}", cmd);
 
-        let res = dispatch(cmd, &self.inner.store);
+        let res = dispatch(cmd, self.store.as_ref());
 
         debug!("Executed Response: {:?}", res);
 

@@ -5,7 +5,7 @@ pub use memory::*;
 use crate::error::KvError;
 use crate::{Kvpair, Value};
 
-pub trait Storage {
+pub trait Storage: Send + Sync + 'static {
     fn get(&self, table: &str, key: &str) -> Result<Option<Value>, KvError>;
 
     fn set(&self, table: &str, key: String, value: Value) -> Result<Option<Value>, KvError>;
