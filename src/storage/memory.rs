@@ -60,3 +60,27 @@ impl Storage for MemTable {
         Ok(Box::new(iter))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::storage::memory::MemTable;
+    use crate::{test_basi_interface, test_get_all, test_get_iter};
+
+    #[test]
+    fn mem_table_basic_interface_should_work() {
+        let store = MemTable::new();
+        test_basi_interface(&store);
+    }
+
+    #[test]
+    fn mem_table_get_all_should_work() {
+        let store = MemTable::new();
+        test_get_all(&store);
+    }
+
+    #[test]
+    fn mem_table_iter_should_work() {
+        let store = MemTable::new();
+        test_get_iter(&store);
+    }
+}

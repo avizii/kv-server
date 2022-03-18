@@ -1,159 +1,124 @@
 pub mod abi;
 
-use http::StatusCode;
-use abi::*;
-use crate::KvError;
 use crate::pb::abi::command_request::RequestData;
+use crate::KvError;
+use abi::*;
+use http::StatusCode;
+use prost::Message;
 
 impl CommandRequest {
     pub fn new_hset<T>(table: T, key: T, value: Value) -> Self
-        where
-            T: Into<String>,
+    where
+        T: Into<String>,
     {
         Self {
-            request_data: Some(
-                RequestData::Hset(
-                    Hset {
-                        table: table.into(),
-                        pair: Some(Kvpair::new(key, value)),
-                    }
-                )
-            )
+            request_data: Some(RequestData::Hset(Hset {
+                table: table.into(),
+                pair: Some(Kvpair::new(key, value)),
+            })),
         }
     }
 
     pub fn new_hmset<T>(table: T, pairs: Vec<Kvpair>) -> Self
-        where
-            T: Into<String>,
+    where
+        T: Into<String>,
     {
         Self {
-            request_data: Some(
-                RequestData::Hmset(
-                    Hmset {
-                        table: table.into(),
-                        pairs,
-                    }
-                )
-            )
+            request_data: Some(RequestData::Hmset(Hmset {
+                table: table.into(),
+                pairs,
+            })),
         }
     }
 
     pub fn new_hget<T>(table: T, key: T) -> Self
-        where
-            T: Into<String>,
+    where
+        T: Into<String>,
     {
         Self {
-            request_data: Some(
-                RequestData::Hget(
-                    Hget {
-                        table: table.into(),
-                        key: key.into(),
-                    }
-                )
-            )
+            request_data: Some(RequestData::Hget(Hget {
+                table: table.into(),
+                key: key.into(),
+            })),
         }
     }
 
     pub fn new_hmget<T>(table: T, keys: Vec<String>) -> Self
-        where
-            T: Into<String>,
+    where
+        T: Into<String>,
     {
         Self {
-            request_data: Some(
-                RequestData::Hmget(
-                    Hmget {
-                        table: table.into(),
-                        keys,
-                    }
-                )
-            )
+            request_data: Some(RequestData::Hmget(Hmget {
+                table: table.into(),
+                keys,
+            })),
         }
     }
 
     pub fn new_hgetall<T>(table: T) -> Self
-        where
-            T: Into<String>,
+    where
+        T: Into<String>,
     {
         Self {
-            request_data: Some(
-                RequestData::Hgetall(
-                    Hgetall {
-                        table: table.into()
-                    }
-                )
-            )
+            request_data: Some(RequestData::Hgetall(Hgetall {
+                table: table.into(),
+            })),
         }
     }
 
     pub fn new_hdel<T>(table: T, key: T) -> Self
-        where
-            T: Into<String>,
+    where
+        T: Into<String>,
     {
         Self {
-            request_data: Some(
-                RequestData::Hdel(
-                    Hdel {
-                        table: table.into(),
-                        key: key.into(),
-                    }
-                )
-            )
+            request_data: Some(RequestData::Hdel(Hdel {
+                table: table.into(),
+                key: key.into(),
+            })),
         }
     }
 
     pub fn new_hmdel<T>(table: T, keys: Vec<String>) -> Self
-        where
-            T: Into<String>,
+    where
+        T: Into<String>,
     {
         Self {
-            request_data: Some(
-                RequestData::Hmdel(
-                    Hmdel {
-                        table: table.into(),
-                        keys,
-                    }
-                )
-            )
+            request_data: Some(RequestData::Hmdel(Hmdel {
+                table: table.into(),
+                keys,
+            })),
         }
     }
 
     pub fn new_hexist<T>(table: T, key: T) -> Self
-        where
-            T: Into<String>,
+    where
+        T: Into<String>,
     {
         Self {
-            request_data: Some(
-                RequestData::Hexist(
-                    Hexist {
-                        table: table.into(),
-                        key: key.into(),
-                    }
-                )
-            )
+            request_data: Some(RequestData::Hexist(Hexist {
+                table: table.into(),
+                key: key.into(),
+            })),
         }
     }
 
     pub fn new_hmexist<T>(table: T, keys: Vec<String>) -> Self
-        where
-            T: Into<String>,
+    where
+        T: Into<String>,
     {
         Self {
-            request_data: Some(
-                RequestData::Hmexist(
-                    Hmexist {
-                        table: table.into(),
-                        keys,
-                    }
-                )
-            )
+            request_data: Some(RequestData::Hmexist(Hmexist {
+                table: table.into(),
+                keys,
+            })),
         }
     }
 }
 
 impl Kvpair {
     pub fn new<T>(key: T, value: Value) -> Self
-        where
-            T: Into<String>,
+    where
+        T: Into<String>,
     {
         Self {
             key: key.into(),
@@ -165,7 +130,7 @@ impl Kvpair {
 impl From<String> for Value {
     fn from(s: String) -> Self {
         Self {
-            value: Some(value::Value::String(s))
+            value: Some(value::Value::String(s)),
         }
     }
 }
@@ -173,7 +138,7 @@ impl From<String> for Value {
 impl From<&str> for Value {
     fn from(s: &str) -> Self {
         Self {
-            value: Some(value::Value::String(s.into()))
+            value: Some(value::Value::String(s.into())),
         }
     }
 }
@@ -181,7 +146,7 @@ impl From<&str> for Value {
 impl From<i64> for Value {
     fn from(i: i64) -> Self {
         Self {
-            value: Some(value::Value::Integer(i))
+            value: Some(value::Value::Integer(i)),
         }
     }
 }
@@ -189,7 +154,7 @@ impl From<i64> for Value {
 impl From<bool> for Value {
     fn from(b: bool) -> Self {
         Self {
-            value: Some(value::Value::Bool(b))
+            value: Some(value::Value::Bool(b)),
         }
     }
 }
@@ -221,6 +186,7 @@ impl From<KvError> for CommandResponse {
             KvError::EncodeError(_) => {}
             KvError::DecodeError(_) => {}
             KvError::Internal(_) => {}
+            _ => {}
         };
 
         result
@@ -251,7 +217,9 @@ impl From<(Vec<(String, Value)>, Vec<(String, KvError)>)> for CommandResponse {
     fn from(tuple: (Vec<(String, Value)>, Vec<(String, KvError)>)) -> Self {
         let status = estimate_status_code_by_vec(&tuple.0);
 
-        let pairs: Vec<_> = tuple.0.into_iter()
+        let pairs: Vec<_> = tuple
+            .0
+            .into_iter()
             .map(|(k, v)| Kvpair::new(k, v))
             .collect();
 
@@ -281,7 +249,9 @@ impl From<(Vec<(String, bool)>, Vec<(String, KvError)>)> for CommandResponse {
         let status = estimate_status_code_by_vec(&tuple.0);
         let message = combine_error_messages(tuple.1);
 
-        let v: Vec<_> = tuple.0.into_iter()
+        let v: Vec<_> = tuple
+            .0
+            .into_iter()
             .map(|(s, b)| Kvpair::new(s, b.into()))
             .collect();
 
@@ -315,6 +285,25 @@ impl From<(String, Value)> for Kvpair {
     }
 }
 
+impl TryFrom<Value> for Vec<u8> {
+    type Error = KvError;
+
+    fn try_from(v: Value) -> Result<Self, Self::Error> {
+        let mut buf = Vec::with_capacity(v.encoded_len());
+        v.encode(&mut buf)?;
+        Ok(buf)
+    }
+}
+
+impl TryFrom<&[u8]> for Value {
+    type Error = KvError;
+
+    fn try_from(data: &[u8]) -> Result<Self, Self::Error> {
+        let msg = Value::decode(data)?;
+        Ok(msg)
+    }
+}
+
 fn estimate_status_code_by_vec<T>(data: &Vec<T>) -> u32 {
     let status;
     if data.len() > 0 {
@@ -327,10 +316,9 @@ fn estimate_status_code_by_vec<T>(data: &Vec<T>) -> u32 {
 
 fn combine_error_messages(errors: Vec<(String, KvError)>) -> String {
     let mut message = String::new();
-    errors.into_iter()
-        .for_each(|(k, v)| {
-            let s = format!("request key: {}, message: {}\n", k, v.to_string());
-            message.push_str(&s);
-        });
+    errors.into_iter().for_each(|(k, v)| {
+        let s = format!("request key: {}, message: {}\n", k, v.to_string());
+        message.push_str(&s);
+    });
     message
 }
