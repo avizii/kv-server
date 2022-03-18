@@ -1,16 +1,16 @@
 use anyhow::Result;
 use async_prost::AsyncProstStream;
 use futures::{SinkExt, StreamExt};
+use kv_server::{CommandRequest, CommandResponse, MemTable, Service, ServiceInner};
 use tokio::net::TcpListener;
 use tracing::info;
-use kv_server::{CommandRequest, CommandResponse, MemTable, Service};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
 
-    let service: Service = Service::new(MemTable::new());
-    
+    let service: Service = ServiceInner::new(MemTable::new()).into();
+
     let addr = "127.0.0.1:9527";
     let listener = TcpListener::bind(addr).await?;
 
@@ -21,9 +21,10 @@ async fn main() -> Result<()> {
         info!("client: {:?} connected", addr);
 
         let handler = service.clone();
-        
+
         tokio::spawn(async move {
-            let mut stream = AsyncProstStream::<_, CommandRequest, CommandResponse, _>::from(stream).for_async();
+            let mut stream =
+                AsyncProstStream::<_, CommandRequest, CommandResponse, _>::from(stream).for_async();
 
             while let Some(Ok(msg)) = stream.next().await {
                 let resp = handler.execute(msg);

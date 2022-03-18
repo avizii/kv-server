@@ -23,5 +23,4 @@ pub enum KvError {
 
     #[error("Internal error: {0}")]
     Internal(String),
-
 }

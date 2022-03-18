@@ -309,6 +309,12 @@ impl From<(Vec<Kvpair>, Vec<(String, KvError)>)> for CommandResponse {
     }
 }
 
+impl From<(String, Value)> for Kvpair {
+    fn from(data: (String, Value)) -> Self {
+        Kvpair::new(data.0, data.1)
+    }
+}
+
 fn estimate_status_code_by_vec<T>(data: &Vec<T>) -> u32 {
     let status;
     if data.len() > 0 {

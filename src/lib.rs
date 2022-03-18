@@ -1,7 +1,7 @@
-mod pb;
 mod error;
-mod storage;
+mod pb;
 mod service;
+mod storage;
 
 pub use error::KvError;
 pub use pb::abi::*;

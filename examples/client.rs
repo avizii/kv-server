@@ -1,9 +1,9 @@
 use anyhow::Result;
 use async_prost::AsyncProstStream;
 use futures::{SinkExt, StreamExt};
+use kv_server::{CommandRequest, CommandResponse, Kvpair};
 use tokio::net::TcpStream;
 use tracing::info;
-use kv_server::{CommandRequest, CommandResponse, Kvpair};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -13,7 +13,8 @@ async fn main() -> Result<()> {
 
     let stream = TcpStream::connect(addr).await?;
 
-    let mut client = AsyncProstStream::<_, CommandResponse, CommandRequest, _>::from(stream).for_async();
+    let mut client =
+        AsyncProstStream::<_, CommandResponse, CommandRequest, _>::from(stream).for_async();
 
     let cmd = CommandRequest::new_hset("t1", "k1", "v1".into());
     client.send(cmd).await?;

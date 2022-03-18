@@ -1,5 +1,5 @@
-use crate::*;
 use crate::error::KvError;
+use crate::*;
 
 impl CommandService for Hset {
     fn execute(self, store: &dyn Storage) -> CommandResponse {
@@ -9,7 +9,7 @@ impl CommandService for Hset {
                 Ok(Some(v)) => v.into(),
                 Ok(None) => Value::default().into(),
                 Err(e) => e.into(),
-            }
+            },
         }
     }
 }
@@ -20,12 +20,16 @@ impl CommandService for Hmset {
         let mut v2 = Vec::new();
 
         for pair in self.pairs {
-            match store.set(&self.table, pair.key.clone(), pair.value.unwrap_or_default()) {
+            match store.set(
+                &self.table,
+                pair.key.clone(),
+                pair.value.unwrap_or_default(),
+            ) {
                 Ok(Some(v)) => v1.push((pair.key, v)),
                 Ok(None) => v1.push((pair.key, Value::default())),
                 Err(e) => v2.push((pair.key, e)),
             }
-        };
+        }
 
         (v1, v2).into()
     }
@@ -52,7 +56,7 @@ impl CommandService for Hmget {
                 Ok(None) => v2.push((key.clone(), KvError::NotFound(self.table.to_string(), key))),
                 Err(e) => v2.push((key, e)),
             }
-        };
+        }
 
         (v1, v2).into()
     }
@@ -84,7 +88,7 @@ impl CommandService for Hdel {
                 };
                 pair.into()
             }
-            Err(e) => e.into()
+            Err(e) => e.into(),
         }
     }
 }
@@ -104,10 +108,7 @@ impl CommandService for Hmdel {
                     v1.push(pair);
                 }
                 Ok(None) => {
-                    let pair = Kvpair {
-                        key,
-                        value: None,
-                    };
+                    let pair = Kvpair { key, value: None };
                     v1.push(pair);
                 }
                 Err(e) => v2.push((key, e)),
@@ -122,7 +123,7 @@ impl CommandService for Hexist {
     fn execute(self, store: &dyn Storage) -> CommandResponse {
         match store.contains(&self.table, &self.key) {
             Ok(b) => b.into(),
-            Err(e) => e.into()
+            Err(e) => e.into(),
         }
     }
 }
@@ -145,8 +146,8 @@ impl CommandService for Hmexist {
 
 #[cfg(test)]
 mod tests {
-    use crate::command_request::RequestData;
     use super::*;
+    use crate::command_request::RequestData;
 
     #[test]
     fn hset_should_work() {
@@ -199,12 +200,16 @@ mod tests {
 
         let cmd = CommandRequest::new_hgetall("t1");
         let res = dispatch(cmd, &store);
-        assert_res_ok(res, &[], &[
-            Kvpair::new("k1", 1.into()),
-            Kvpair::new("k2", 2.into()),
-            Kvpair::new("k3", 3.into()),
-            Kvpair::new("k4", 4.into()),
-        ]);
+        assert_res_ok(
+            res,
+            &[],
+            &[
+                Kvpair::new("k1", 1.into()),
+                Kvpair::new("k2", 2.into()),
+                Kvpair::new("k3", 3.into()),
+                Kvpair::new("k4", 4.into()),
+            ],
+        );
     }
 
     #[test]
@@ -222,11 +227,15 @@ mod tests {
 
         let cmd = CommandRequest::new_hgetall("t1");
         let res = dispatch(cmd, &store);
-        assert_res_ok(res, &[], &[
-            Kvpair::new("k1", 1.into()),
-            Kvpair::new("k2", 2.into()),
-            Kvpair::new("k3", 3.into()),
-        ])
+        assert_res_ok(
+            res,
+            &[],
+            &[
+                Kvpair::new("k1", 1.into()),
+                Kvpair::new("k2", 2.into()),
+                Kvpair::new("k3", 3.into()),
+            ],
+        )
     }
 
     #[test]
@@ -242,18 +251,18 @@ mod tests {
         let cmd = CommandRequest::new_hmset("t1", pairs);
         dispatch(cmd, &store);
 
-        let keys = vec![
-            "k1".to_string(),
-            "k2".to_string(),
-            "k3".to_string(),
-        ];
+        let keys = vec!["k1".to_string(), "k2".to_string(), "k3".to_string()];
         let cmd = CommandRequest::new_hmget("t1", keys);
         let res = dispatch(cmd, &store);
-        assert_res_ok(res, &[], &[
-            Kvpair::new("k1", 1.into()),
-            Kvpair::new("k2", 2.into()),
-            Kvpair::new("k3", 3.into()),
-        ])
+        assert_res_ok(
+            res,
+            &[],
+            &[
+                Kvpair::new("k1", 1.into()),
+                Kvpair::new("k2", 2.into()),
+                Kvpair::new("k3", 3.into()),
+            ],
+        )
     }
 
     #[test]
@@ -266,18 +275,18 @@ mod tests {
         let cmd = CommandRequest::new_hdel("t1", "k1");
         let res = dispatch(cmd, &store);
 
-        assert_res_ok(res, &[], &[
-            Kvpair::new("k1", 1.into())
-        ]);
+        assert_res_ok(res, &[], &[Kvpair::new("k1", 1.into())]);
         let cmd = CommandRequest::new_hdel("t1", "k1");
         let res = dispatch(cmd, &store);
 
-        assert_res_ok(res, &[], &[
-            Kvpair {
+        assert_res_ok(
+            res,
+            &[],
+            &[Kvpair {
                 key: "k1".to_string(),
                 value: None,
-            }
-        ]);
+            }],
+        );
     }
 
     #[test]
@@ -293,21 +302,24 @@ mod tests {
         let cmd = CommandRequest::new_hmset("t1", pairs);
         dispatch(cmd, &store);
 
-        let cmd = CommandRequest::new_hmdel("t1", vec![
-            "k1".to_string(),
-            "k2".to_string(),
-            "k4".to_string(),
-        ]);
+        let cmd = CommandRequest::new_hmdel(
+            "t1",
+            vec!["k1".to_string(), "k2".to_string(), "k4".to_string()],
+        );
 
         let res = dispatch(cmd, &store);
-        assert_res_ok(res, &[], &[
-            Kvpair::new("k1", 1.into()),
-            Kvpair::new("k2", 1.into()),
-            Kvpair {
-                key: "k4".to_string(),
-                value: None,
-            }
-        ]);
+        assert_res_ok(
+            res,
+            &[],
+            &[
+                Kvpair::new("k1", 1.into()),
+                Kvpair::new("k2", 1.into()),
+                Kvpair {
+                    key: "k4".to_string(),
+                    value: None,
+                },
+            ],
+        );
     }
 
     #[test]
@@ -333,15 +345,16 @@ mod tests {
         let cmd = CommandRequest::new_hset("t1", "k1", 1.into());
         dispatch(cmd, &store);
 
-        let cmd = CommandRequest::new_hmexist("t1", vec![
-            "k1".to_string(),
-            "k2".to_string(),
-        ]);
+        let cmd = CommandRequest::new_hmexist("t1", vec!["k1".to_string(), "k2".to_string()]);
         let res = dispatch(cmd, &store);
-        assert_res_ok(res, &[], &[
-            Kvpair::new("k1", true.into()),
-            Kvpair::new("k2", false.into()),
-        ]);
+        assert_res_ok(
+            res,
+            &[],
+            &[
+                Kvpair::new("k1", true.into()),
+                Kvpair::new("k2", false.into()),
+            ],
+        );
     }
 
     fn dispatch(cmd: CommandRequest, store: &dyn Storage) -> CommandResponse {
